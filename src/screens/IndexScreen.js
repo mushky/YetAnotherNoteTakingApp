@@ -1,10 +1,22 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Context } from '../context/NoteContext';
 import { Feather } from '@expo/vector-icons';
 
-const IndexScreen = ({navigation}) => {
-	const { state, deleteNote } = useContext(Context);
+const IndexScreen = ({ navigation }) => {
+	const { state, deleteNote, getNotes } = useContext(Context);
+
+	useEffect(() => {
+		getNotes();
+
+		const listener = navigation.addListener('didFocus', () => {
+			getNotes();
+		});
+
+		return () => {
+			listener.remove();
+		}
+	}, []);
 
 	return(
 		<View>

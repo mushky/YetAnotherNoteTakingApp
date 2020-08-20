@@ -1,7 +1,10 @@
 import createDataContext from './createDataContext';
+import jsonServer from '../api/jsonServer';
 
 const noteReducer = (state, action) => {
 	switch (action.type) {
+		case 'get_notes': 
+			return action.payload;
 		case 'delete_note':
 			return state.filter((note) => note.id !== action.payload);
 		case 'add_note':
@@ -22,13 +25,23 @@ const noteReducer = (state, action) => {
 	}
 };
 
+const getNotes = dispatch => {
+	return async () => {
+		const response = await jsonServer.get('/notes');
+
+		dispatch({ type: 'get_notes', payload: response.data });
+	};
+};
+
 const addNote = dispatch => {
-	return (title, content, callback) => {
-		dispatch({ type: 'add_note', payload: { title: title, content: content} });
+	return async (title, content, callback) => {
+		await jsonServer.post('/notes', { title, content });
+		
+		// dispatch({ type: 'add_note', payload: { title: title, content: content} });
 		if (callback) {
 			callback();
-		}
-	};
+		};
+	}
 };
 
 const deleteNote = dispatch => {
@@ -48,6 +61,6 @@ const editNote = dispatch => {
 
 export const { Context, Provider } = createDataContext(
 	noteReducer, 
-	{ addNote, deleteNote, editNote }, 
-	[{ title: "Test Note", content: "Testing Content", id: 1 }]
+	{ getNotes, addNote, deleteNote, editNote },
+	
 );
